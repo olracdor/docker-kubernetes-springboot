@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-v2
+  labels:
+    app: springboot-v2
+    component: java-app-v2
+spec:
+  replicas: 4
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  selector:
+    matchLabels:
+      app: springboot-v2
+      component: java-app-v2
+  template:
+    metadata:
+      labels:
+        app: springboot-v2
+        component: java-app-v2
+    spec:
+      containers:
+        - image: appregistryone.azurecr.io/gs-spring-boot-docker:v2
+          name: appregistryone
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: springboot-v2
+  name: java-app
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 8080
+  selector:
+    app: springboot-v2
+    component: java-app-v2
+  type: LoadBalancer
